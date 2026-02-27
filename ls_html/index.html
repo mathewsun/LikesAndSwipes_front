@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Likes And Swipes - Onboarding</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <main class="container">
+    
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-circle">
+        ❤️
+      </div>
+      <h1>Likes And Swipes</h1>
+      <p class="subtitle">Let's create your profile</p>
+    </div>
+
+    <!-- Card -->
+    <section class="card">
+      
+      <!-- Progress -->
+      <div class="progress">
+        <div class="progress-bar active"></div>
+        <div class="progress-bar"></div>
+        <div class="progress-bar"></div>
+        <div class="progress-bar"></div>
+      </div>
+
+      <p class="step">Step 1 of 4</p>
+
+      <h2>What's your name?</h2>
+
+      <form id="onboardingForm">
+        <div class="input-group">
+          <input 
+            type="text" 
+            id="firstName" 
+            placeholder="Enter your first name"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn-primary">
+          Continue
+        </button>
+      </form>
+
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
