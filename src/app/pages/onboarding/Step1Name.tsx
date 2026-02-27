@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Heart } from 'lucide-react';
 import { Button } from '../../components/ui/button';
@@ -11,7 +11,23 @@ export default function Step1Name() {
 
   const handleContinue = () => {
     if (name.trim()) {
-      localStorage.setItem('userName', name);
+      const sendPostRequest = async () => {
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: 'React Hooks POST Request Example' })
+        };
+        
+        try {
+          const response = await fetch('https://reqres.in/api/posts', requestOptions);
+          const data = await response.json();
+          console.log('Post created:', data.id);
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      };
+      
+      sendPostRequest(); // Вызываем асинхронную функцию
       navigate('/onboarding/age');
     }
   };
@@ -27,7 +43,7 @@ export default function Step1Name() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 mb-4">
             <Heart className="w-8 h-8 text-white" fill="white" />
           </div>
-          <h1 className="text-3xl mb-2">Welcome to Spark</h1>
+          <h1 className="text-3xl mb-2">Likes And Swipes</h1>
           <p className="text-gray-600">Let's create your profile</p>
         </div>
 
