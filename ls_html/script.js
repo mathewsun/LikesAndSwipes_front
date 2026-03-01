@@ -59,3 +59,43 @@ backBtns.forEach(btn => {
 });
 
 updateUI();
+
+// PHOTO STEP FUNCTIONALITY
+const photoSlots = document.querySelectorAll(".photo-slot input");
+const photoCounter = document.getElementById("photoCounter");
+const photoContinueBtn = document.getElementById("photoContinue");
+
+let photoCount = 0;
+
+photoSlots.forEach(input => {
+  input.addEventListener("change", function () {
+    if (this.files && this.files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = e => {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+
+        const parent = this.parentElement;
+        parent.innerHTML = "";
+        parent.appendChild(img);
+
+        updatePhotoCount();
+      };
+
+      reader.readAsDataURL(this.files[0]);
+    }
+  });
+});
+
+function updatePhotoCount() {
+  photoCount = document.querySelectorAll(".photo-slot img").length;
+  photoCounter.textContent = photoCount;
+}
+
+photoContinueBtn.addEventListener("click", () => {
+  if (photoCount < 2) {
+    alert("Please upload at least 2 photos.");
+    return;
+  }
+});

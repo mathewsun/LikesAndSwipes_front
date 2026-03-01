@@ -56,6 +56,33 @@
 		  <button class="btn-primary next-btn">Continue</button>
 		</div>
 	  </div>
+	  
+	  <!-- Step 3 -->
+		<div class="form-step" data-step="3">
+		  <h2>Add your photos</h2>
+		  <p class="sub-text">Add at least 2 photos to continue</p>
+
+		  <div class="photo-grid">
+			<!-- 6 Upload Slots -->
+			<label class="photo-slot">
+			  <input type="file" accept="image/*" hidden>
+			  <span class="upload-icon">+</span>
+			</label>
+
+			<label class="photo-slot"><input type="file" accept="image/*" hidden></label>
+			<label class="photo-slot"><input type="file" accept="image/*" hidden></label>
+			<label class="photo-slot"><input type="file" accept="image/*" hidden></label>
+			<label class="photo-slot"><input type="file" accept="image/*" hidden></label>
+			<label class="photo-slot"><input type="file" accept="image/*" hidden></label>
+		  </div>
+
+		  <p class="photo-count"><span id="photoCounter">0</span>/6 photos added</p>
+
+		  <div class="button-row">
+			<button class="btn-secondary back-btn">Back</button>
+			<button class="btn-primary next-btn" id="photoContinue">Continue</button>
+		  </div>
+		</div>
 
 	</section>
 
