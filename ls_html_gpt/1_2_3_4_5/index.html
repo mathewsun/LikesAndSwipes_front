@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Likes And Swipes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-left">
+      <div class="brand">LikesAndSwipes</div>
+      <nav>
+        <a href="#">Home</a>
+        <a href="#">Privacy</a>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <a href="#">Register</a>
+      <a href="#">Login</a>
+    </div>
+  </header>
+
+<main class="main">
+
+  <div class="branding">
+    <div class="logo-circle">❤️</div>
+    <h1>Likes And Swipes</h1>
+    <p>Let's create your profile</p>
+  </div>
+
+  <div class="card">
+
+    <!-- Progress -->
+    <div class="progress">
+      <div class="progress-bar" data-step="1"></div>
+      <div class="progress-bar" data-step="2"></div>
+      <div class="progress-bar" data-step="3"></div>
+      <div class="progress-bar"></div>
+      <div class="progress-bar"></div>
+    </div>
+
+    <span class="step-text">
+      Step <span id="currentStep">1</span> of 5
+    </span>
+
+    <!-- STEP 1 -->
+    <div class="form-step active" data-step="1">
+      <h2>What's your name?</h2>
+      <input type="text" id="nameInput" placeholder="Enter your first name">
+      <button class="btn-primary next-btn">Continue</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="form-step" data-step="2">
+      <h2>How old are you?</h2>
+      <input type="number" id="ageInput" placeholder="Enter your age" min="18">
+      <div class="button-row">
+        <button class="btn-secondary back-btn">Back</button>
+        <button class="btn-primary next-btn">Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="form-step" data-step="3">
+      <h2>Add your photos</h2>
+      <p class="sub-text">Add at least 2 photos to continue</p>
+
+      <div class="photo-grid">
+        <label class="photo-box">
+          <input type="file" accept="image/*" class="photo-input">
+          <span>+</span>
+        </label>
+        <label class="photo-box">
+          <input type="file" accept="image/*" class="photo-input">
+        </label>
+        <label class="photo-box">
+          <input type="file" accept="image/*" class="photo-input">
+        </label>
+        <label class="photo-box">
+          <input type="file" accept="image/*" class="photo-input">
+        </label>
+        <label class="photo-box">
+          <input type="file" accept="image/*" class="photo-input">
+        </label>
+        <label class="photo-box">
+          <input type="file" accept="image/*" class="photo-input">
+        </label>
+      </div>
+
+      <p id="photoCount">0/6 photos added</p>
+
+      <div class="button-row">
+        <button class="btn-secondary back-btn">Back</button>
+        <button class="btn-primary next-btn">Continue</button>
+      </div>
+    </div>
+	
+	<!-- STEP 4 -->
+	<div class="form-step" data-step="4">
+		<h2>Select interests</h2>
+		<div class="interests">
+			<button type="button" class="interest">Travel</button>
+			<button type="button" class="interest">Photography</button>
+			<button type="button" class="interest">Hiking</button>
+			<button type="button" class="interest">Coffee</button>
+			<button type="button" class="interest">Music</button>
+			<button type="button" class="interest">Movies</button>
+			<button type="button" class="interest">Gaming</button>
+			<button type="button" class="interest">Fitness</button>
+		</div>
+		<p id="interestCount">0/5 selected</p>
+		<div class="button-row">
+			<button class="btn-secondary back-btn">Back</button>
+			<button class="btn-primary next-btn">Next</button>
+		</div>
+	</div>
+
+	<!-- STEP 5 -->
+	<div class="form-step" data-step="5">
+		<h2>Create account</h2>
+		<input type="text" id="email" placeholder="Email or phone" />
+		<input type="password" id="password" placeholder="Password" />
+		<input type="password" id="confirmPassword" placeholder="Confirm password" />
+		<div class="button-row">
+			<button class="btn-secondary back-btn">Back</button>
+			<button class="btn-primary" id="registerBtn">Register</button>
+		</div>
+	</div>
+
+  </div>
+</main>
+
+<footer class="footer">
+  © 2026 - LikesAndSwipes - <a href="#">Privacy</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
