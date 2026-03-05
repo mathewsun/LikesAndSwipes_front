@@ -92,3 +92,41 @@ function updatePhotoCount() {
 }
 
 updateUI();
+
+/* Interests logic */
+const interests = document.querySelectorAll(".interest");
+const interestCount = document.getElementById("interestCount");
+
+interests.forEach(btn => {
+    btn.addEventListener("click", () => {
+        btn.classList.toggle("selected");
+
+        const selected = document.querySelectorAll(".interest.selected");
+
+        if (selected.length > 5) {
+            btn.classList.remove("selected");
+            return;
+        }
+
+        interestCount.textContent = `${selected.length}/5 selected`;
+    });
+});
+
+/* Registration validation */
+document.getElementById("registerBtn").addEventListener("click", () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    if (!email || !password || !confirmPassword) {
+        alert("Please fill all fields.");
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return;
+    }
+
+    alert("Registration complete 🎉");
+});
