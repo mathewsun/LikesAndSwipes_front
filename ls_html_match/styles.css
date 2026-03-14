@@ -6,7 +6,7 @@ font-family:Arial;
 }
 
 body{
-background:#f3f3f6;
+background:#f4f4f6;
 height:100vh;
 display:flex;
 flex-direction:column;
@@ -17,21 +17,15 @@ display:flex;
 justify-content:space-between;
 padding:14px 40px;
 background:#e9e9ec;
-font-size:14px;
 }
 
 .navbar a{
-margin-left:18px;
+margin-left:20px;
 text-decoration:none;
 color:#333;
 }
 
-.logo{
-font-weight:bold;
-margin-right:20px;
-}
-
-.main{
+main{
 flex:1;
 display:flex;
 flex-direction:column;
@@ -39,9 +33,9 @@ align-items:center;
 justify-content:center;
 }
 
-/* CARD STACK */
+/* CARD DECK */
 
-.card-stack{
+.deck{
 position:relative;
 width:360px;
 height:520px;
@@ -55,8 +49,7 @@ border-radius:20px;
 overflow:hidden;
 box-shadow:0 20px 40px rgba(0,0,0,0.2);
 background:white;
-cursor:grab;
-transition:transform .3s;
+touch-action:none;
 }
 
 .card img{
@@ -66,51 +59,38 @@ object-fit:cover;
 }
 
 .card:nth-child(2){
-transform:rotate(8deg);
-opacity:0.6;
+transform:scale(.95) translateY(10px);
+opacity:.6;
 }
 
-/* INFO */
+/* PROFILE */
 
-.card-info{
+.info{
 position:absolute;
 bottom:0;
 left:0;
 right:0;
+
 padding:25px;
-color:white;
 
 background:linear-gradient(
 transparent,
-rgba(0,0,0,0.8)
+rgba(0,0,0,.8)
 );
-}
 
-.card-info h2{
-font-size:24px;
-margin-bottom:6px;
-}
-
-.location{
-font-size:14px;
-margin-bottom:8px;
-}
-
-.bio{
-font-size:14px;
-margin-bottom:10px;
+color:white;
 }
 
 .tags span{
 display:inline-block;
+background:rgba(255,255,255,.25);
 padding:5px 10px;
 border-radius:20px;
-background:rgba(255,255,255,0.3);
-margin:3px;
+margin:4px;
 font-size:12px;
 }
 
-/* BUTTONS */
+/* ACTION BUTTONS */
 
 .actions{
 margin-top:40px;
@@ -125,20 +105,20 @@ border-radius:50%;
 border:none;
 font-size:22px;
 cursor:pointer;
-box-shadow:0 10px 20px rgba(0,0,0,0.15);
+box-shadow:0 10px 20px rgba(0,0,0,.15);
 }
 
 #dislike{
-color:red;
 background:white;
+color:red;
 }
 
-#reset{
+#rewind{
 background:white;
-color:#f3a73c;
+color:#f4b74a;
 }
 
 #like{
-background:linear-gradient(45deg,#ff4da6,#8f6bff);
+background:linear-gradient(45deg,#ff4da6,#8b6bff);
 color:white;
 }

@@ -4,41 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LikesAndSwipes</title>
-
 <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
 <header class="navbar">
-<div class="nav-left">
-<span class="logo">LikesAndSwipes</span>
+<div class="left">
+<strong>LikesAndSwipes</strong>
 <a href="#">Home</a>
 <a href="#">Privacy</a>
 </div>
 
-<div class="nav-right">
+<div class="right">
 <a href="#">Register</a>
 <a href="#">Login</a>
 </div>
 </header>
 
 
-<main class="main">
+<main>
 
-<div id="card-stack" class="card-stack">
+<div id="deck" class="deck">
 
 <div class="card">
 <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e">
 
-<div class="card-info">
+<div class="info">
 <h2>Alex, 31</h2>
-<p class="location">📍 5 miles away</p>
-
-<p class="bio">
-Foodie exploring the city one restaurant at a time 🍜
-Live music lover 🎸
-</p>
+<p>📍 5 miles away</p>
 
 <div class="tags">
 <span>Cooking</span>
@@ -54,14 +48,9 @@ Live music lover 🎸
 <div class="card">
 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330">
 
-<div class="card-info">
+<div class="info">
 <h2>Sarah, 28</h2>
-<p class="location">📍 3 miles away</p>
-
-<p class="bio">
-Coffee enthusiast ☕  
-Travel addict ✈️
-</p>
+<p>📍 3 miles away</p>
 
 <div class="tags">
 <span>Photography</span>
@@ -78,13 +67,12 @@ Travel addict ✈️
 <div class="actions">
 
 <button id="dislike">✕</button>
-<button id="reset">↺</button>
+<button id="rewind">↺</button>
 <button id="like">❤</button>
 
 </div>
 
 </main>
-
 
 <script src="script.js"></script>
 
