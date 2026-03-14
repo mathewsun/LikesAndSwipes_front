@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LikesAndSwipes</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LikesAndSwipes</title>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -11,69 +11,77 @@
 <body>
 
 <header class="navbar">
-  <div class="nav-left">
-    <span class="logo">LikesAndSwipes</span>
-    <a href="#">Home</a>
-    <a href="#">Privacy</a>
-  </div>
+<div class="nav-left">
+<span class="logo">LikesAndSwipes</span>
+<a href="#">Home</a>
+<a href="#">Privacy</a>
+</div>
 
-  <div class="nav-right">
-    <a href="#">Register</a>
-    <a href="#">Login</a>
-  </div>
+<div class="nav-right">
+<a href="#">Register</a>
+<a href="#">Login</a>
+</div>
 </header>
 
 
 <main class="main">
 
-<div class="card-container">
+<div id="card-stack" class="card-stack">
 
-  <!-- BACK CARD -->
-  <div class="card back-card">
-    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330">
-  </div>
+<div class="card">
+<img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e">
 
-  <!-- FRONT CARD -->
-  <div class="card front-card">
+<div class="card-info">
+<h2>Alex, 31</h2>
+<p class="location">📍 5 miles away</p>
 
-    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e">
+<p class="bio">
+Foodie exploring the city one restaurant at a time 🍜
+Live music lover 🎸
+</p>
 
-    <div class="card-overlay">
+<div class="tags">
+<span>Cooking</span>
+<span>Music</span>
+<span>Wine</span>
+<span>Art</span>
+</div>
 
-      <div class="profile-info">
-        <h2>Alex, 31</h2>
+</div>
+</div>
 
-        <p class="location">📍 5 miles away</p>
 
-        <p class="bio">
-        Foodie exploring the city one restaurant at a time 🍜  
-        Live music lover 🎸
-        </p>
+<div class="card">
+<img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330">
 
-        <div class="tags">
-          <span>Cooking</span>
-          <span>Music</span>
-          <span>Wine</span>
-          <span>Art</span>
-        </div>
+<div class="card-info">
+<h2>Sarah, 28</h2>
+<p class="location">📍 3 miles away</p>
 
-      </div>
+<p class="bio">
+Coffee enthusiast ☕  
+Travel addict ✈️
+</p>
 
-    </div>
+<div class="tags">
+<span>Photography</span>
+<span>Hiking</span>
+<span>Coffee</span>
+</div>
 
-  </div>
+</div>
+</div>
 
 </div>
 
 
 <div class="actions">
 
-<button class="btn dislike">✕</button>
-<button class="btn reset">↺</button>
-<button class="btn like">❤</button>
+<button id="dislike">✕</button>
+<button id="reset">↺</button>
+<button id="like">❤</button>
 
 </div>
-
 
 </main>
 
