@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spark – Dating App</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f0ff; color: #1a1a2e; overflow: hidden; }
+
+    /* ── Screens ── */
+    .screen { display: none; height: 100vh; width: 100vw; position: fixed; inset: 0; overflow-y: auto; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    /* ── Gradient helpers ── */
+    .grad { background: linear-gradient(135deg, #ec4899, #9333ea); }
+    .grad-text { background: linear-gradient(135deg, #ec4899, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* ── Onboarding wrapper ── */
+    .onboarding-bg {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: linear-gradient(160deg, #fce7f3 0%, #ede9fe 100%);
+    }
+    .card {
+      background: #fff;
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(147,51,234,.15);
+      width: 100%;
+      max-width: 420px;
+      animation: fadeUp .35s ease;
+    }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } }
+
+    /* Progress bar */
+    .progress-bar { display: flex; gap: 8px; margin-bottom: 24px; }
+    .progress-bar span { flex: 1; height: 4px; border-radius: 4px; background: #e5e7eb; transition: background .3s; }
+    .progress-bar span.done { background: linear-gradient(90deg,#ec4899,#9333ea); }
+
+    /* Step labels */
+    .step-label { font-size: 12px; color: #9ca3af; margin-bottom: 4px; }
+    .step-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+
+    /* Inputs */
+    .inp {
+      width: 100%; padding: 16px; font-size: 16px;
+      border: 2px solid #e5e7eb; border-radius: 14px;
+      outline: none; transition: border .2s;
+    }
+    .inp:focus { border-color: #ec4899; }
+    .inp-error { color: #ef4444; font-size: 13px; margin-top: 6px; }
+
+    /* Radio buttons for gender */
+    .radio-group { display: flex; gap: 12px; margin-bottom: 24px; }
+    .radio-option { flex: 1; }
+    .radio-option input[type="radio"] { display: none; }
+    .radio-option label {
+      display: block; cursor: pointer; padding: 16px;
+      border: 2px solid #e5e7eb; border-radius: 14px;
+      text-align: center; font-size: 16px; font-weight: 600;
+      transition: all .2s; background: #fff;
+    }
+    .radio-option input[type="radio"]:checked + label {
+      border-color: #ec4899; background: linear-gradient(135deg,#fce7f3,#ede9fe);
+      color: #9333ea;
+    }
+    .radio-option label:hover { border-color: #d1d5db; }
+
+    /* Buttons */
+    .btn { cursor: pointer; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; padding: 16px 24px; transition: transform .1s, opacity .2s; width: 100%; }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: linear-gradient(135deg,#ec4899,#9333ea); color:#fff; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-outline { background: #fff; border: 2px solid #e5e7eb; color: #374151; }
+    .btn-outline:hover { border-color: #d1d5db; }
+    .btn-row { display: flex; gap: 12px; margin-top: 8px; }
+    .btn-row .btn-outline { flex: 0 0 33%; }
+    .btn-row .btn-primary { flex: 1; }
+
+    /* ── Welcome ── */
+    #screen-welcome {
+      background: linear-gradient(160deg,#fce7f3 0%, #ede9fe 100%);
+      align-items: center; justify-content: center; text-align: center; padding: 32px;
+    }
+    .logo-circle { width:90px;height:90px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:24px; }
+    .logo-circle svg { width:48px;height:48px; }
+    #screen-welcome h1 { font-size: 38px; font-weight: 800; margin-bottom: 8px; }
+    #screen-welcome p { color: #6b7280; font-size: 16px; margin-bottom: 40px; }
+
+    /* ── Photos grid ── */
+    .photo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
+    .photo-slot {
+      aspect-ratio: 1; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 700; cursor: pointer; transition: all .2s;
+      background: #f3f4f6; color: #9ca3af;
+    }
+    .photo-slot.filled { background: linear-gradient(135deg,#ec4899,#9333ea); color:#fff; }
+    .photo-slot.next { background: #f9fafb; border: 2px dashed #d1d5db; }
+    .photo-slot svg { width:32px;height:32px;stroke:#9ca3af; }
+
+    /* ── Interests ── */
+    .interests-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .interest-chip {
+      padding: 8px 16px; border-radius: 999px; font-size: 14px; cursor: pointer;
+      background: #f3f4f6; color: #374151; border: 2px solid transparent; transition: all .15s;
+    }
+    .interest-chip:hover { background: #e5e7eb; }
+    .interest-chip.selected { background: linear-gradient(135deg,#ec4899,#9333ea); color:#fff; border-color: transparent; }
+
+    /* ── Swipe Screen ── */
+    #screen-swipe {
+      background: #f8f0ff;
+      display: flex; flex-direction: column;
+    }
+
+    /* Header */
+    .swipe-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+      background: #fff;
+      box-shadow: 0 1px 8px rgba(0,0,0,.06);
+    }
+    .swipe-header .brand { display:flex; align-items:center; gap:10px; }
+    .swipe-header .brand-icon { width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center; }
+    .swipe-header .brand-name { font-size:20px;font-weight:800; }
+    .swipe-header .header-btns { display:flex; gap:8px; }
+    .icon-btn { background:none; border:none; cursor:pointer; padding:8px; border-radius:50%; transition: background .15s; }
+    .icon-btn:hover { background:#f3f4f6; }
+    .icon-btn svg { width:24px;height:24px; stroke:#6b7280; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+    /* Stack area */
+    .stack-area {
+      flex: 1; display:flex; align-items:center; justify-content:center;
+      padding: 16px 16px 100px;
+      position: relative;
+    }
+    .card-stack { position:relative; width:100%; max-width:360px; height:520px; }
+
+    /* Profile card */
+    .profile-card {
+      position: absolute; inset: 0;
+      border-radius: 24px; overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+      background: #fff;
+      user-select: none;
+      cursor: grab;
+      touch-action: none;
+    }
+    .profile-card.back-card {
+      transform: scale(.96) translateY(8px);
+      z-index: 1;
+      pointer-events: none;
+      transition: transform .3s;
+    }
+    .profile-card.top-card { z-index: 2; transition: box-shadow .2s; }
+    .profile-card img { width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
+    .profile-card .overlay {
+      position:absolute; inset:0;
+      background: linear-gradient(to top, rgba(0,0,0,.7) 0%, rgba(0,0,0,.15) 50%, transparent 100%);
+    }
+    .profile-card .info {
+      position:absolute; bottom:0; left:0; right:0; padding:24px; color:#fff;
+    }
+    .profile-card .info h2 { font-size:28px; font-weight:800; margin-bottom:4px; }
+    .profile-card .info .dist { display:flex;align-items:center;gap:4px;font-size:13px;opacity:.9;margin-bottom:8px; }
+    .profile-card .info .dist svg { width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round; }
+    .profile-card .info p { font-size:13px; opacity:.9; margin-bottom:10px; line-height:1.5; }
+    .profile-card .tags { display:flex;flex-wrap:wrap;gap:6px; }
+    .profile-card .tag { padding:4px 12px;border-radius:999px;font-size:12px;background:rgba(255,255,255,.2);backdrop-filter:blur(4px); }
+
+    /* Like / Nope labels */
+    .stamp {
+      position:absolute; top:28px;
+      padding: 8px 20px;
+      border-radius: 10px;
+      font-size: 22px; font-weight: 900; letter-spacing: 2px;
+      opacity: 0; pointer-events:none; transition: opacity .1s;
+    }
+    .stamp-like { left:20px; border: 4px solid #22c55e; color:#22c55e; transform:rotate(-12deg); }
+    .stamp-nope { right:20px; border: 4px solid #ef4444; color:#ef4444; transform:rotate(12deg); }
+
+    /* Action buttons */
+    .action-bar {
+      position:fixed; bottom: 0; left:0; right:0;
+      display:flex; align-items:center; justify-content:center;
+      gap:20px; padding:16px;
+      background: rgba(248,240,255,.85);
+      backdrop-filter:blur(8px);
+    }
+    .action-bar.hidden { display:none; }
+    .act-btn {
+      border:none; border-radius:50%; display:flex;align-items:center;justify-content:center;
+      cursor:pointer; box-shadow:0 6px 20px rgba(0,0,0,.12);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .act-btn:hover { transform:scale(1.08); box-shadow:0 10px 28px rgba(0,0,0,.18); }
+    .act-btn:active { transform:scale(.95); }
+    .act-btn.nope { width:60px;height:60px;background:#fff; }
+    .act-btn.undo { width:52px;height:52px;background:#fff; }
+    .act-btn.like { width:60px;height:60px;background:linear-gradient(135deg,#ec4899,#9333ea); }
+    .act-btn:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+    .act-btn svg { stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; fill:none; }
+    .act-btn.nope svg { stroke:#ef4444; width:28px;height:28px; }
+    .act-btn.undo svg { stroke:#eab308; width:22px;height:22px; }
+    .act-btn.like svg { stroke:#fff;fill:#fff; width:28px;height:28px; }
+
+    /* Empty state */
+    #empty-state {
+      display:none; flex-direction:column;align-items:center;justify-content:center;
+      text-align:center; padding:40px;
+    }
+    #empty-state.show { display:flex; }
+    #empty-state .icon { width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:24px; }
+    #empty-state h2 { font-size:28px;font-weight:800;margin-bottom:8px; }
+    #empty-state p { color:#6b7280;margin-bottom:24px; }
+
+    /* ── Match Modal ── */
+    #match-modal {
+      display:none; position:fixed;inset:0;z-index:100;
+      background:rgba(0,0,0,.55);
+      backdrop-filter:blur(6px);
+      align-items:center;justify-content:center;
+      padding:24px;
+    }
+    #match-modal.show { display:flex; animation:fadeIn .25s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .match-card {
+      background:#fff; border-radius:28px; padding:40px 32px;
+      max-width:380px; width:100%; text-align:center;
+      box-shadow:0 30px 80px rgba(0,0,0,.25);
+      animation: popIn .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn { from{opacity:0;transform:scale(.8) translateY(40px)} to{opacity:1;transform:none} }
+    .match-card .heart-icon { width:80px;height:80px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px; }
+    .match-card h2 { font-size:36px;font-weight:900;margin-bottom:8px; }
+    .match-card p { color:#6b7280;margin-bottom:24px; }
+    .match-photo-wrap { position:relative;width:180px;height:180px;margin:0 auto 28px; }
+    .match-photo-wrap img { width:100%;height:100%;object-fit:cover;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.15); }
+    .match-photo-badge { position:absolute;top:-8px;right:-8px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center; }
+    .match-photo-badge svg { width:22px;height:22px;stroke:#fff;fill:#fff; }
+    .match-actions { display:flex;flex-direction:column;gap:10px; }
+
+    /* Transitions between onboarding steps */
+    .card { transform: translateX(0); }
+    .slide-in { animation: slideIn .3s ease; }
+    @keyframes slideIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:none} }
+  </style>
+</head>
+<body>
+
+<!-- ════════════ WELCOME ════════════ -->
+<div id="screen-welcome" class="screen active">
+  <div class="logo-circle grad" style="width:90px;height:90px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:24px;">
+    <svg viewBox="0 0 24 24" fill="white" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  </div>
+  <h1 class="grad-text">Spark</h1>
+  <p>Find your perfect match, one swipe at a time ✨</p>
+  <button class="btn btn-primary" style="max-width:320px;width:100%;" onclick="goTo('screen-step1')">Get Started</button>
+</div>
+
+<!-- ════════════ STEP 1 – NAME ════════════ -->
+<div id="screen-step1" class="screen">
+  <div class="onboarding-bg">
+    <div class="card slide-in">
+      <div class="progress-bar">
+        <span class="done"></span><span></span><span></span><span></span><span></span>
+      </div>
+      <p class="step-label">Step 1 of 5</p>
+      <p class="step-title">What's your name?</p>
+      <input id="inp-name" class="inp" type="text" placeholder="Enter your first name" autocomplete="off" />
+      <div class="btn-row" style="margin-top:24px;">
+        <button class="btn btn-primary" id="btn-step1" onclick="submitStep1()" disabled>Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ STEP 2 – GENDER ════════════ -->
+<div id="screen-step2" class="screen">
+  <div class="onboarding-bg">
+    <div class="card slide-in">
+      <div class="progress-bar">
+        <span class="done"></span><span class="done"></span><span></span><span></span><span></span>
+      </div>
+      <p class="step-label">Step 2 of 5</p>
+      <p class="step-title">I am a</p>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" id="gender-woman" name="gender" value="woman" />
+          <label for="gender-woman">Woman</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" id="gender-man" name="gender" value="man" />
+          <label for="gender-man">Man</label>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:24px;">
+        <button class="btn btn-outline" onclick="goTo('screen-step1')">Back</button>
+        <button class="btn btn-primary" id="btn-step2-gender" onclick="submitStep2Gender()" disabled>Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ STEP 3 – AGE ════════════ -->
+<div id="screen-step3" class="screen">
+  <div class="onboarding-bg">
+    <div class="card slide-in">
+      <div class="progress-bar">
+        <span class="done"></span><span class="done"></span><span class="done"></span><span></span><span></span>
+      </div>
+      <p class="step-label">Step 3 of 5</p>
+      <p class="step-title">How old are you?</p>
+      <input id="inp-age" class="inp" type="number" placeholder="Enter your age" min="18" max="99" />
+      <p id="age-error" class="inp-error" style="display:none;">Please enter a valid age (18–99)</p>
+      <div class="btn-row" style="margin-top:24px;">
+        <button class="btn btn-outline" onclick="goTo('screen-step2')">Back</button>
+        <button class="btn btn-primary" id="btn-step3" onclick="submitStep3()">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ STEP 4 – PHOTOS ════════════ -->
+<div id="screen-step4" class="screen">
+  <div class="onboarding-bg">
+    <div class="card slide-in">
+      <div class="progress-bar">
+        <span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span></span>
+      </div>
+      <p class="step-label">Step 4 of 5</p>
+      <p class="step-title">Add your photos</p>
+      <p style="font-size:14px;color:#6b7280;margin-bottom:16px;">Add at least 2 photos to continue</p>
+      <div class="photo-grid" id="photo-grid"></div>
+      <p id="photo-count" style="text-align:center;font-size:13px;color:#9ca3af;margin-bottom:20px;">0/6 photos added</p>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goTo('screen-step3')">Back</button>
+        <button class="btn btn-primary" id="btn-step4" onclick="goTo('screen-step5')">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ STEP 5 – INTERESTS ════════════ -->
+<div id="screen-step5" class="screen">
+  <div class="onboarding-bg">
+    <div class="card slide-in" style="max-height:92vh;overflow-y:auto;">
+      <div class="progress-bar">
+        <span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span>
+      </div>
+      <p class="step-label">Step 5 of 5</p>
+      <p class="step-title">Your interests</p>
+      <p style="font-size:14px;color:#6b7280;margin-bottom:16px;">Select at least 3 interests (max 5)</p>
+      <div class="interests-wrap" id="interests-wrap"></div>
+      <p id="interest-count" style="text-align:center;font-size:13px;color:#9ca3af;margin-bottom:20px;">0/5 interests selected</p>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goTo('screen-step4')">Back</button>
+        <button class="btn btn-primary" id="btn-step5" onclick="startSwiping()" disabled>Start Swiping</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SWIPE ════════════ -->
+<div id="screen-swipe" class="screen">
+  <!-- Header -->
+  <div class="swipe-header">
+    <div class="brand">
+      <div class="brand-icon grad">
+        <svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <span class="brand-name">Spark</span>
+    </div>
+    <div class="header-btns">
+      <button class="icon-btn" title="Settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <button class="icon-btn" title="Messages">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </button>
+      <button class="icon-btn" title="Profile">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stack -->
+  <div class="stack-area">
+    <!-- Empty state -->
+    <div id="empty-state">
+      <div class="icon grad">
+        <svg viewBox="0 0 24 24" fill="white" width="40" height="40"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <h2>No more profiles</h2>
+      <p>Check back later for new people nearby!</p>
+      <button class="btn btn-primary" style="max-width:240px;" onclick="resetSwipe()">Start Over</button>
+    </div>
+
+    <!-- Card stack -->
+    <div class="card-stack" id="card-stack">
+      <!-- back card -->
+      <div class="profile-card back-card" id="back-card"></div>
+      <!-- top card -->
+      <div class="profile-card top-card" id="top-card">
+        <div class="stamp stamp-like" id="stamp-like">LIKE</div>
+        <div class="stamp stamp-nope" id="stamp-nope">NOPE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="action-bar" id="action-bar">
+    <button class="act-btn nope" onclick="swipe('left')" title="Nope">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <button class="act-btn undo" id="undo-btn" onclick="undoSwipe()" title="Undo" disabled>
+      <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+    </button>
+    <button class="act-btn like" onclick="swipe('right')" title="Like">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ════════════ MATCH MODAL ════════════ -->
+<div id="match-modal" onclick="closeMatch(event)">
+  <div class="match-card" onclick="event.stopPropagation()">
+    <div class="heart-icon grad" style="margin:0 auto 20px;">
+      <svg viewBox="0 0 24 24" fill="white" width="40" height="40"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </div>
+    <h2 class="grad-text">It's a Match!</h2>
+    <p id="match-desc">You liked each other</p>
+    <div class="match-photo-wrap">
+      <img id="match-img" src="" alt="Match" />
+      <div class="match-photo-badge grad">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+    </div>
+    <div class="match-actions">
+      <button class="btn btn-primary" onclick="closeMatch()">Send a Message 💬</button>
+      <button class="btn btn-outline" onclick="closeMatch()">Keep Swiping</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════ */
+const mockUsers = [
+  { id:'1', name:'Sarah',   age:28, bio:'Coffee enthusiast ☕ | Travel addict ✈️ | Dog mom to a golden retriever 🐕',    interests:['Travel','Photography','Hiking','Coffee'],         photo:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800', distance:3  },
+  { id:'2', name:'Alex',    age:31, bio:'Foodie exploring the city one restaurant at a time 🍝 Live music lover 🎸',      interests:['Cooking','Music','Wine','Art'],                   photo:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800', distance:5  },
+  { id:'3', name:'Jamie',   age:26, bio:'Yoga instructor by day, Netflix connoisseur by night 🧘‍♀️📺',                      interests:['Yoga','Fitness','Reading','Movies'],              photo:'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800', distance:2  },
+  { id:'4', name:'Michael', age:29, bio:'Software engineer who actually goes outside 💻🌲 Rock climbing enthusiast',       interests:['Rock Climbing','Technology','Gaming','Hiking'],   photo:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800', distance:7  },
+  { id:'5', name:'Emma',    age:27, bio:'Artist and plant parent 🌿🎨 Looking for someone to explore museums with',        interests:['Art','Plants','Museums','Painting'],              photo:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800', distance:4  },
+  { id:'6', name:'Daniel',  age:33, bio:'Adventure seeker 🏔️ Trying to visit all national parks. Chef on weekends 👨‍🍳',  interests:['Hiking','Cooking','Photography','Travel'],        photo:'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800', distance:6  },
+  { id:'7', name:'Olivia',  age:25, bio:'Dance teacher with a passion for salsa 💃 Beach lover and sunset chaser 🌅',      interests:['Dancing','Beach','Music','Travel'],               photo:'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800', distance:3  },
+  { id:'8', name:'Chris',   age:30, bio:'Architect by profession, musician by passion 🎵 Love a good craft beer 🍺',       interests:['Music','Architecture','Beer','Concerts'],         photo:'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800', distance:5  },
+];
+
+const interests = ['Travel','Photography','Hiking','Coffee','Cooking','Music','Wine','Art','Yoga','Fitness','Reading','Movies','Rock Climbing','Technology','Gaming','Plants','Museums','Dancing','Beach','Architecture','Beer','Concerts'];
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let currentIndex = 0;
+let history = [];
+let photoCount = 0;
+let selectedInterests = [];
+
+/* ═══════════════════════════════════════════
+   ROUTING
+═══════════════════════════════════════════ */
+function goTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById(screenId);
+  s.classList.add('active');
+  // Reset animation
+  const card = s.querySelector('.card');
+  if (card) { card.classList.remove('slide-in'); void card.offsetWidth; card.classList.add('slide-in'); }
+}
+
+/* ═══════════════════════════════════════════
+   STEP 1 – NAME
+═══════════════════════════════════════════ */
+const inpName = document.getElementById('inp-name');
+const btnStep1 = document.getElementById('btn-step1');
+inpName.addEventListener('input', () => { btnStep1.disabled = !inpName.value.trim(); });
+inpName.addEventListener('keydown', e => { if(e.key==='Enter') submitStep1(); });
+function submitStep1() {
+  if (!inpName.value.trim()) return;
+  localStorage.setItem('userName', inpName.value.trim());
+  goTo('screen-step2');
+}
+
+/* ═══════════════════════════════════════════
+   STEP 2 – GENDER
+═══════════════════════════════════════════ */
+const genderRadios = document.querySelectorAll('input[name="gender"]');
+const btnStep2Gender = document.getElementById('btn-step2-gender');
+genderRadios.forEach(radio => {
+  radio.addEventListener('change', () => {
+    btnStep2Gender.disabled = !Array.from(genderRadios).some(r => r.checked);
+  });
+});
+function submitStep2Gender() {
+  const selectedGender = Array.from(genderRadios).find(r => r.checked)?.value;
+  if (!selectedGender) return;
+  localStorage.setItem('userGender', selectedGender);
+  goTo('screen-step3');
+}
+
+/* ═══════════════════════════════════════════
+   STEP 3 – AGE
+═══════════════════════════════════════════ */
+const inpAge = document.getElementById('inp-age');
+const btnStep3 = document.getElementById('btn-step3');
+const ageError = document.getElementById('age-error');
+inpAge.addEventListener('input', () => {
+  const v = parseInt(inpAge.value);
+  const valid = v >= 18 && v <= 99;
+  ageError.style.display = (inpAge.value && !valid) ? 'block' : 'none';
+  btnStep3.disabled = !valid;
+});
+inpAge.addEventListener('keydown', e => { if(e.key==='Enter') submitStep3(); });
+function submitStep3() {
+  const v = parseInt(inpAge.value);
+  if (v < 18 || v > 99) return;
+  localStorage.setItem('userAge', v);
+  goTo('screen-step4');
+}
+
+/* ═══════════════════════════════════════════
+   STEP 4 – PHOTOS
+═══════════════════════════════════════════ */
+function renderPhotoGrid() {
+  const grid = document.getElementById('photo-grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'photo-slot';
+    if (i < photoCount) {
+      slot.classList.add('filled');
+      slot.textContent = i + 1;
+    } else if (i === photoCount) {
+      slot.classList.add('next');
+      slot.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+      slot.onclick = addPhoto;
+    } else {
+      slot.innerHTML = `<span style="font-size:18px;color:#d1d5db;">${i+1}</span>`;
+    }
+    grid.appendChild(slot);
+  }
+  document.getElementById('photo-count').textContent = `${photoCount}/6 photos added`;
+  document.getElementById('btn-step4').disabled = photoCount < 2;
+}
+function addPhoto() {
+  if (photoCount < 6) { photoCount++; renderPhotoGrid(); }
+}
+renderPhotoGrid();
+
+/* ═══════════════════════════════════════════
+   STEP 5 – INTERESTS
+═══════════════════════════════════════════ */
+function renderInterests() {
+  const wrap = document.getElementById('interests-wrap');
+  wrap.innerHTML = '';
+  interests.forEach(interest => {
+    const chip = document.createElement('button');
+    chip.className = 'interest-chip' + (selectedInterests.includes(interest) ? ' selected' : '');
+    chip.textContent = interest;
+    chip.onclick = () => toggleInterest(interest);
+    wrap.appendChild(chip);
+  });
+  document.getElementById('interest-count').textContent = `${selectedInterests.length}/5 interests selected`;
+  document.getElementById('btn-step5').disabled = selectedInterests.length < 3;
+}
+function toggleInterest(interest) {
+  if (selectedInterests.includes(interest)) {
+    selectedInterests = selectedInterests.filter(i => i !== interest);
+  } else if (selectedInterests.length < 5) {
+    selectedInterests.push(interest);
+  }
+  renderInterests();
+}
+renderInterests();
+
+/* ═══════════════════════════════════════════
+   START SWIPING
+═══════════════════════════════════════════ */
+function startSwiping() {
+  localStorage.setItem('userInterests', JSON.stringify(selectedInterests));
+  currentIndex = 0;
+  history = [];
+  renderSwipeCards();
+  goTo('screen-swipe');
+}
+
+/* ═══════════════════════════════════════════
+   SWIPE ENGINE
+═══════════════════════════════════════════ */
+const topCard = document.getElementById('top-card');
+const backCard = document.getElementById('back-card');
+const cardStack = document.getElementById('card-stack');
+const emptyState = document.getElementById('empty-state');
+const actionBar = document.getElementById('action-bar');
+const undoBtn = document.getElementById('undo-btn');
+const stampLike = document.getElementById('stamp-like');
+const stampNope = document.getElementById('stamp-nope');
+
+function buildCardHTML(user) {
+  const tags = user.interests.slice(0,4).map(t => `<span class="tag">${t}</span>`).join('');
+  return `
+    <img src="${user.photo}" alt="${user.name}" />
+    <div class="overlay"></div>
+    <div class="info">
+      <h2>${user.name}, ${user.age}</h2>
+      <div class="dist">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>${user.distance} miles away</span>
+      </div>
+      <p>${user.bio}</p>
+      <div class="tags">${tags}</div>
+    </div>`;
+}
+
+function renderSwipeCards() {
+  const curr = mockUsers[currentIndex];
+  const next = mockUsers[currentIndex + 1];
+
+  if (!curr) {
+    cardStack.style.display = 'none';
+    emptyState.classList.add('show');
+    actionBar.classList.add('hidden');
+    return;
+  }
+
+  cardStack.style.display = 'block';
+  emptyState.classList.remove('show');
+  actionBar.classList.remove('hidden');
+
+  // top card (reset stamps)
+  topCard.innerHTML = `<div class="stamp stamp-like" id="stamp-like">LIKE</div><div class="stamp stamp-nope" id="stamp-nope">NOPE</div>`;
+  topCard.innerHTML += buildCardHTML(curr);
+  topCard.style.transform = '';
+  topCard.style.opacity = '1';
+  topCard.style.transition = '';
+
+  // back card
+  if (next) {
+    backCard.innerHTML = buildCardHTML(next);
+    backCard.style.display = 'block';
+  } else {
+    backCard.style.display = 'none';
+  }
+
+  undoBtn.disabled = history.length === 0;
+  initDrag();
+}
+
+/* ── Drag / Swipe ── */
+let startX = 0, startY = 0, currentX = 0, isDragging = false;
+
+function initDrag() {
+  topCard.onmousedown = dragStart;
+  topCard.ontouchstart = dragStart;
+}
+
+function dragStart(e) {
+  isDragging = true;
+  const point = e.touches ? e.touches[0] : e;
+  startX = point.clientX;
+  startY = point.clientY;
+  topCard.style.transition = 'none';
+  document.onmousemove = dragMove;
+  document.ontouchmove = dragMove;
+  document.onmouseup = dragEnd;
+  document.ontouchend = dragEnd;
+}
+
+function dragMove(e) {
+  if (!isDragging) return;
+  const point = e.touches ? e.touches[0] : e;
+  currentX = point.clientX - startX;
+  const currentY = point.clientY - startY;
+  const rotate = currentX * 0.08;
+  topCard.style.transform = `translate(${currentX}px, ${currentY * 0.3}px) rotate(${rotate}deg)`;
+
+  // stamps
+  const likeStamp = topCard.querySelector('.stamp-like');
+  const nopeStamp = topCard.querySelector('.stamp-nope');
+  const ratio = Math.min(Math.abs(currentX) / 120, 1);
+  if (currentX > 0) {
+    if (likeStamp) likeStamp.style.opacity = ratio;
+    if (nopeStamp) nopeStamp.style.opacity = 0;
+  } else {
+    if (nopeStamp) nopeStamp.style.opacity = ratio;
+    if (likeStamp) likeStamp.style.opacity = 0;
+  }
+}
+
+function dragEnd() {
+  if (!isDragging) return;
+  isDragging = false;
+  document.onmousemove = null;
+  document.ontouchmove = null;
+  document.onmouseup = null;
+  document.ontouchend = null;
+
+  if (Math.abs(currentX) > 130) {
+    swipe(currentX > 0 ? 'right' : 'left');
+  } else {
+    // snap back
+    topCard.style.transition = 'transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s';
+    topCard.style.transform = '';
+    const likeStamp = topCard.querySelector('.stamp-like');
+    const nopeStamp = topCard.querySelector('.stamp-nope');
+    if (likeStamp) likeStamp.style.opacity = 0;
+    if (nopeStamp) nopeStamp.style.opacity = 0;
+  }
+  currentX = 0;
+}
+
+function swipe(direction) {
+  if (currentIndex >= mockUsers.length) return;
+  const user = mockUsers[currentIndex];
+  const xTarget = direction === 'right' ? window.innerWidth * 1.5 : -window.innerWidth * 1.5;
+
+  topCard.style.transition = 'transform .4s ease, opacity .4s ease';
+  topCard.style.transform = `translate(${xTarget}px, 0) rotate(${direction === 'right' ? 30 : -30}deg)`;
+  topCard.style.opacity = '0';
+
+  history.push(currentIndex);
+
+  if (direction === 'right' && Math.random() > 0.7) {
+    setTimeout(() => showMatch(user), 350);
+  }
+
+  setTimeout(() => {
+    currentIndex++;
+    renderSwipeCards();
+  }, 420);
+}
+
+function undoSwipe() {
+  if (history.length === 0) return;
+  currentIndex = history.pop();
+  renderSwipeCards();
+}
+
+function resetSwipe() {
+  currentIndex = 0;
+  history = [];
+  renderSwipeCards();
+}
+
+/* ═══════════════════════════════════════════
+   MATCH MODAL
+═══════════════════════════════════════════ */
+function showMatch(user) {
+  document.getElementById('match-img').src = user.photo;
+  document.getElementById('match-desc').textContent = `You and ${user.name} liked each other 💕`;
+  document.getElementById('match-modal').classList.add('show');
+}
+function closeMatch(e) {
+  if (!e || e.target === document.getElementById('match-modal')) {
+    document.getElementById('match-modal').classList.remove('show');
+  }
+}
+</script>
+</body>
+</html>

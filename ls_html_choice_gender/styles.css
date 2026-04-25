@@ -1,0 +1,124 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
+body{
+background:#f4f4f6;
+height:100vh;
+display:flex;
+flex-direction:column;
+}
+
+.navbar{
+display:flex;
+justify-content:space-between;
+padding:14px 40px;
+background:#e9e9ec;
+}
+
+.navbar a{
+margin-left:20px;
+text-decoration:none;
+color:#333;
+}
+
+main{
+flex:1;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+}
+
+/* CARD DECK */
+
+.deck{
+position:relative;
+width:360px;
+height:520px;
+}
+
+.card{
+position:absolute;
+width:100%;
+height:100%;
+border-radius:20px;
+overflow:hidden;
+box-shadow:0 20px 40px rgba(0,0,0,0.2);
+background:white;
+touch-action:none;
+}
+
+.card img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.card:nth-child(2){
+transform:scale(.95) translateY(10px);
+opacity:.6;
+}
+
+/* PROFILE */
+
+.info{
+position:absolute;
+bottom:0;
+left:0;
+right:0;
+
+padding:25px;
+
+background:linear-gradient(
+transparent,
+rgba(0,0,0,.8)
+);
+
+color:white;
+}
+
+.tags span{
+display:inline-block;
+background:rgba(255,255,255,.25);
+padding:5px 10px;
+border-radius:20px;
+margin:4px;
+font-size:12px;
+}
+
+/* ACTION BUTTONS */
+
+.actions{
+margin-top:40px;
+display:flex;
+gap:20px;
+}
+
+.actions button{
+width:60px;
+height:60px;
+border-radius:50%;
+border:none;
+font-size:22px;
+cursor:pointer;
+box-shadow:0 10px 20px rgba(0,0,0,.15);
+}
+
+#dislike{
+background:white;
+color:red;
+}
+
+#rewind{
+background:white;
+color:#f4b74a;
+}
+
+#like{
+background:linear-gradient(45deg,#ff4da6,#8b6bff);
+color:white;
+}
